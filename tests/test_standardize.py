@@ -1,11 +1,11 @@
 import pytest
 import pandas as pd
 import numpy as np
-from excel_to_pandas import ExcelToPandasPipeline
+from standardize import StandardizePipeline 
 
 @pytest.fixture
 def pipeline():
-    return ExcelToPandasPipeline()
+    return StandardizePipeline()
 
 @pytest.fixture
 def mock_data():
@@ -143,12 +143,3 @@ def test_remove_invalid_columns(pipeline, mock_data):
         expected_columns,
         obj="DataFrame Index"
     )
-
-# Placeholder tests for future implementation
-@pytest.mark.skip(reason="Not implemented yet")
-def test_insert_missing_rows():
-    pass
-
-@pytest.mark.skip(reason="Not implemented yet")
-def test_insert_missing_columns():
-    pass

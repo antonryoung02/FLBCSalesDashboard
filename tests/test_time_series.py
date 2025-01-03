@@ -70,4 +70,3 @@ def test_transform(pipeline, mock_data_1, expected_results_1):
     pd.testing.assert_frame_equal(res_df_dict['col1'], expected_results_1['col1'])
     pd.testing.assert_frame_equal(res_df_dict['col2'], expected_results_1['col2'])
     pd.testing.assert_frame_equal(res_df_dict['col3'], expected_results_1['col3'])
-    assert 1 == 0

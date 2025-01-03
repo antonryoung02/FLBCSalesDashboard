@@ -2,11 +2,10 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 from filters import BaseFilter
-from utils import get_all_columns, get_all_rows, sort_time_strings
+from utils import get_all_columns, get_all_rows, sort_time_strings, read_categories_dataframe
 from datetime import datetime
 import numpy as np
 import os 
-from config import BASE_DIR_PATH, CONFIG_SHEET_NAME, DATA_FILENAME
 
 class CumulativeStatisticsDisplayPipeline:
     ignore_names = ['*categories', 'FC%', '*menu Price $', '*CM $', '*FC $', '*cm category']
@@ -76,7 +75,7 @@ def display_cumulative(dataframe_dict, selected_data):
             
 
         with col2:
-            category_df = pd.read_excel(os.path.join(BASE_DIR_PATH, DATA_FILENAME), sheet_name=CONFIG_SHEET_NAME)
+            category_df = read_categories_dataframe()
             category_df["ALL ITEMS"] = np.nan
             category_df = category_df.reindex(sorted(category_df.columns), axis=1)
             if selected_data == "Per-Product Data":
