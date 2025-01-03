@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main 
-
+      - debug-branch
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -26,7 +26,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest
-
+        
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+    
     - name: Run tests
       run: |
         pytest --disable-warnings
