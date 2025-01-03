@@ -1,10 +1,6 @@
 import plotly.graph_objects as go
 import streamlit as st
-import os 
-from utils import get_all_rows, sort_time_strings
-import pandas as pd 
-import numpy as np
-from config import BASE_DIR_PATH, CONFIG_SHEET_NAME, DATA_FILENAME
+from utils import get_all_rows, sort_time_strings, read_categories_dataframe
 from filters import BaseFilter
 
 def display_menu_engineering(dataframe_dict):
@@ -13,7 +9,7 @@ def display_menu_engineering(dataframe_dict):
     col1, col2 = st.columns([2, 8]) 
 
     with col2:
-        category_df = pd.read_excel(os.path.join(BASE_DIR_PATH, DATA_FILENAME), sheet_name=CONFIG_SHEET_NAME)
+        category_df = read_categories_dataframe()
 
         category_df = category_df.reindex(sorted(category_df.columns), axis=1)
 
@@ -43,9 +39,6 @@ def display_menu_engineering(dataframe_dict):
 
 
 
-
-
-
 class MenuEngineeringDisplayPipeline:
     
     def __init__(self):
@@ -72,7 +65,7 @@ class MenuEngineeringDisplayPipeline:
     
     def display(self, dataframe_dict):
  
-        category_df = pd.read_excel(os.path.join(BASE_DIR_PATH, DATA_FILENAME), sheet_name=CONFIG_SHEET_NAME)
+        category_df = read_categories_dataframe()
         category_df = category_df.reindex(sorted(category_df.columns), axis=1)
 
         for name, df in dataframe_dict.items():

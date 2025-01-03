@@ -1,3 +1,7 @@
+import pandas as pd
+from config import CONFIG_SHEET_NAME, DATA_FILENAME, BASE_DIR_PATH
+import os
+
 def get_all_rows(dataframe_dict) -> set:
     """ Retrieves all products that exist in the data
 
@@ -36,3 +40,10 @@ def sort_time_strings(time_strings: list) -> list:
     sorted_strings = [f"{month}.{year:02}" for year, month in sorted_tuples]
     
     return sorted_strings
+
+def convert_columns_to_float64(df:pd.DataFrame) -> None:
+    int_cols = df.select_dtypes(include=['int','object']).columns
+    df[int_cols] = df[int_cols].astype('float64')
+
+def read_categories_dataframe() -> pd.DataFrame:
+    return pd.read_excel(os.path.join(BASE_DIR_PATH, DATA_FILENAME), sheet_name=CONFIG_SHEET_NAME)
