@@ -10,6 +10,7 @@ from displays.display_time_series import display_time_series
 from displays.display_trends import display_trends
 import os
 from config import BASE_DIR_PATH, DATA_FILENAME
+import warnings
 
 def extract(sheets_dict):
     pubhouse_dict = {}
@@ -37,6 +38,7 @@ def apply_streamlit_override_styles():
 def main():
     st.set_page_config(layout="wide", page_title="Sales Dashboard", page_icon="📊")
     apply_streamlit_override_styles()
+    warnings.filterwarnings("ignore", category=UserWarning, module="streamlit")
 
     dataframes = pd.read_excel(
         os.path.join(BASE_DIR_PATH, DATA_FILENAME),
