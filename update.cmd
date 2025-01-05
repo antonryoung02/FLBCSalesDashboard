@@ -1,14 +1,14 @@
 @echo off
-cd <path\to\your\github\repo>
+cd C:\Users\info\OneDrive\Desktop\FLBC 1.1.1\Revenue and menu engineering data\FLBCSalesDashboard\
 
 echo Pulling the latest changes
 git pull
 
 echo Activating Environment
 REM protects against conda not recognized
-call <path\to\your_virtualenv\Scripts\activate>
+call C:\Users\info\Miniconda3\envs\sales_dashboard
 
-conda activate <your_env_name>
+conda activate sales_dashboard
 
 echo Installing packages
 pip install -r requirements.txt
