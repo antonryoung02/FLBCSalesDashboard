@@ -75,6 +75,7 @@ def display_cumulative(dataframe_dict, selected_data):
             
 
         with col2:
+            # TODO HANDLE ERROR GRACEFULLY
             category_df = read_categories_dataframe()
             category_df["ALL ITEMS"] = np.nan
             category_df = category_df.reindex(sorted(category_df.columns), axis=1)
@@ -102,7 +103,7 @@ def display_cumulative(dataframe_dict, selected_data):
                 default=default,
                 key="trends_multi",
             )
-
+            # TODO TEST -- BREAKING ON WINDOWS
             start_time_str, end_time_str = st.select_slider(
                 "Time Range",
                 options=[row.strftime("%#m/%y") for row in all_time_rows_dt], 
