@@ -5,9 +5,6 @@ echo Pulling the latest changes
 git pull
 
 echo Activating Environment
-REM protects against conda not recognized
-call C:\Users\info\Miniconda3\envs\sales_dashboard
-
 conda activate sales_dashboard
 
 echo Installing packages
