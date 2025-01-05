@@ -103,8 +103,8 @@ def display_time_series(dataframe_dict, selected_data):
 
             start_time_str, end_time_str = st.select_slider(
                 "Time Range",
-                options=[row.strftime("%-m/%y") for row in all_time_rows_dt], 
-                value=(all_time_rows_dt[0].strftime("%-m/%y"), all_time_rows_dt[-1].strftime("%-m/%y")),
+                options=[row.strftime("%#m/%y") for row in all_time_rows_dt], 
+                value=(all_time_rows_dt[0].strftime("%#m/%y"), all_time_rows_dt[-1].strftime("%#m/%y")),
                 key="time_series_slider"
             )
 
@@ -112,7 +112,7 @@ def display_time_series(dataframe_dict, selected_data):
             end_time = datetime.strptime(end_time_str, "%m/%y")
 
             selected_rows = [
-                row.strftime("%-m.%y") for row in all_time_rows_dt if start_time <= row <= end_time
+                row.strftime("%#m.%y") for row in all_time_rows_dt if start_time <= row <= end_time
             ]
 
             shp = SalesHistoryDisplayPipeline()
