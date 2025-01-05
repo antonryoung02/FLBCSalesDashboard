@@ -1,6 +1,6 @@
-from standardize import StandardizePipeline 
-from time_series import TimeSeriesPipeline
-from time_series_cumulative import TimeSeriesCumulativePipeline
+from app.standardize import StandardizePipeline 
+from app.time_series import TimeSeriesPipeline
+from app.time_series_cumulative import TimeSeriesCumulativePipeline
 import re
 import pandas as pd
 import streamlit as st
@@ -9,7 +9,7 @@ from displays.display_cumulative import display_cumulative
 from displays.display_time_series import display_time_series
 from displays.display_trends import display_trends
 import os
-from config import BASE_DIR_PATH, DATA_FILENAME
+from app.config import BASE_DIR_PATH, DATA_FILENAME
 import warnings
 
 def extract(sheets_dict):

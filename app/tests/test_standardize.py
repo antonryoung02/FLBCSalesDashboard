@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from standardize import StandardizePipeline 
+from app.standardize import StandardizePipeline 
 
 @pytest.fixture
 def pipeline():

@@ -1,8 +1,8 @@
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-from filters import BaseFilter
-from utils import get_all_columns, get_all_rows, sort_time_strings, read_categories_dataframe
+from app.filters import BaseFilter
+from app.utils import get_all_columns, get_all_rows, sort_time_strings, read_categories_dataframe
 from datetime import datetime
 import numpy as np
 

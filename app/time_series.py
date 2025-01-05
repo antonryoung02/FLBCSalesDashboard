@@ -1,5 +1,5 @@
 import pandas as pd
-from utils import get_all_columns, get_all_rows, convert_columns_to_float64
+from app.utils import get_all_columns, get_all_rows, convert_columns_to_float64
 
 class TimeSeriesPipeline:
 

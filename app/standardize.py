@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from utils import get_all_columns, get_all_rows, convert_columns_to_float64
+from app.utils import get_all_columns, get_all_rows, convert_columns_to_float64
 
 class StandardizePipeline:
     """
