@@ -1,5 +1,5 @@
 import pandas as pd
-from config import CONFIG_SHEET_NAME, DATA_FILENAME, BASE_DIR_PATH
+from app.config import CONFIG_SHEET_NAME, DATA_FILENAME, BASE_DIR_PATH
 import os
 
 def get_all_rows(dataframe_dict) -> set:

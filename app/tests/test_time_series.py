@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from time_series import TimeSeriesPipeline
+from app.time_series import TimeSeriesPipeline
 
 @pytest.fixture
 def mock_data_1():

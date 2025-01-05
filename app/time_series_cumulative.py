@@ -1,6 +1,6 @@
 import pandas as pd
 import os 
-from utils import read_categories_dataframe
+from app.utils import read_categories_dataframe
 
 class TimeSeriesCumulativePipeline:
 
