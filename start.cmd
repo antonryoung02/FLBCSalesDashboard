@@ -1,10 +1,11 @@
 @echo off
-cd <path\to\your\streamlit\app>
+cd C:\Users\info\OneDrive\Desktop\FLBC 1.1.1\Revenue and menu engineering data\FLBCSalesDashboard\
 
 echo Activating virtual environment
-call <path\to\conda\Scripts\activate>
+call C:\Users\<YourUsername>\Miniconda3\envs\sales_dashboard\Scripts\activate
 
-conda activate <your_env_name>
+
+conda activate sales_dashboard 
 
 echo Running application
-start cmd /k "conda activate <your_env_name> && streamlit run <main.py>"
+start cmd /k "conda activate sales_dashboard && streamlit run app\main.py"
