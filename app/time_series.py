@@ -1,6 +1,6 @@
 import pandas as pd
 from app.utils import get_all_columns, get_all_rows, convert_columns_to_float64
-
+import app.dataframe_operations as dfo
 class TimeSeriesPipeline:
 
     def transform(self, dataframe_dict):
@@ -21,6 +21,7 @@ class TimeSeriesPipeline:
         feature_df = feature_df.T
         feature_df.index = [name for name in dataframe_dict.keys()]
         feature_df.columns = rows
-        convert_columns_to_float64(feature_df)
+        dfo.convert_columns_to_float64(feature_df)
 
         return feature_df
+    

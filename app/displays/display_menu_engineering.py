@@ -2,6 +2,8 @@ import plotly.graph_objects as go
 import streamlit as st
 from app.utils import get_all_rows, sort_time_strings, read_categories_dataframe
 from app.filters import BaseFilter
+from categories_dataframe import categories_dataframe
+from app.config import DATE_FILE_MONTH_FORMAT
 
 def display_menu_engineering(dataframe_dict):
     
@@ -9,20 +11,17 @@ def display_menu_engineering(dataframe_dict):
     col1, col2 = st.columns([2, 8]) 
 
     with col2:
-        category_df = read_categories_dataframe()
-
-        category_df = category_df.reindex(sorted(category_df.columns), axis=1)
 
         selected_indices = st.multiselect(
             "Products",
-            options=category_df.columns, 
+            options=categories_dataframe.get_columns(), 
             key="menu_series_multi",
         )
 
         selected_products = []
         for i in selected_indices:
-            non_nan_values = category_df[i].dropna().tolist()
-            selected_products += [val for val in non_nan_values]
+            non_nan_values = categories_dataframe.get_values_for_column(i)
+            selected_products += non_nan_values
 
         all_time_rows = sort_time_strings(list(dataframe_dict.keys()))
         selected_row = st.select_slider(
@@ -64,15 +63,12 @@ class MenuEngineeringDisplayPipeline:
         return data
     
     def display(self, dataframe_dict):
- 
-        category_df = read_categories_dataframe()
-        category_df = category_df.reindex(sorted(category_df.columns), axis=1)
 
         for name, df in dataframe_dict.items():
             fig = go.Figure()
 
-            for category in category_df.columns:
-                category_items = category_df[category].dropna().values
+            for category in categories_dataframe.get_columns():
+                category_items = categories_dataframe.get_values_for_column(category)
                 category_indices = [index for index in df.index if index in category_items]
 
                 filtered_df = df.loc[category_indices]

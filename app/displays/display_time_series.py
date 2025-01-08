@@ -2,10 +2,11 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 from app.filters import BaseFilter
-from app.utils import get_all_columns, get_all_rows, sort_time_strings, read_categories_dataframe
+from app.utils import get_all_columns, get_all_rows, sort_time_strings
 from datetime import datetime
 import numpy as np
-
+from categories_dataframe import categories_dataframe
+from app.config import DATE_FILE_MONTH_FORMAT
 class SalesHistoryDisplayPipeline:
     ignore_names = ['*categories']
     
@@ -69,24 +70,19 @@ def display_time_series(dataframe_dict, selected_data):
         )
 
         with col2:
-            # Buttons for each column
-            category_df = read_categories_dataframe()
-            category_df["ALL ITEMS"] = np.nan
-            category_df = category_df.reindex(sorted(category_df.columns), axis=1)
-            
+
             if selected_data == "Per-Product Data":
                 st.write("Quick-select products")
-                cols = st.columns(len(category_df.columns)) 
+                cols = st.columns(len(categories_dataframe.get_columns())) 
 
             if "time_series_multi" not in st.session_state:
                 st.session_state.time_series_multi = [] 
 
             if selected_data == "Per-Product Data":
-                for col, column_name in zip(cols, category_df.columns):
+                for col, column_name in zip(cols, categories_dataframe.get_columns()):
                     with col:
                         if st.button(column_name, key=f"time_series_multi_{column_name}"):
-                            non_nan_values = category_df[column_name].dropna().tolist()
-                            st.session_state.time_series_multi = [val for val in non_nan_values]
+                            st.session_state.time_series_multi = categories_dataframe.get_values_for_column(column_name)
 
 
             if set(st.session_state.time_series_multi) <= set(all_time_columns):
@@ -103,8 +99,8 @@ def display_time_series(dataframe_dict, selected_data):
 
             start_time_str, end_time_str = st.select_slider(
                 "Time Range",
-                options=[row.strftime("%#m/%y") for row in all_time_rows_dt], 
-                value=(all_time_rows_dt[0].strftime("%#m/%y"), all_time_rows_dt[-1].strftime("%#m/%y")),
+                options=[row.strftime(f"{DATE_FILE_MONTH_FORMAT}/%y") for row in all_time_rows_dt], 
+                value=(all_time_rows_dt[0].strftime(f"{DATE_FILE_MONTH_FORMAT}/%y"), all_time_rows_dt[-1].strftime(f"{DATE_FILE_MONTH_FORMAT}/%y")),
                 key="time_series_slider"
             )
 
@@ -112,7 +108,7 @@ def display_time_series(dataframe_dict, selected_data):
             end_time = datetime.strptime(end_time_str, "%m/%y")
 
             selected_rows = [
-                row.strftime("%#m.%y") for row in all_time_rows_dt if start_time <= row <= end_time
+                row.strftime(f"{DATE_FILE_MONTH_FORMAT}.%y") for row in all_time_rows_dt if start_time <= row <= end_time
             ]
 
             shp = SalesHistoryDisplayPipeline()

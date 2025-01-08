@@ -2,10 +2,12 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 from app.filters import BaseFilter
-from app.utils import get_all_columns, get_all_rows, sort_time_strings, read_categories_dataframe
+from app.utils import get_all_columns, get_all_rows, sort_time_strings
 from datetime import datetime
 import numpy as np
 import os 
+from app.config import DATE_FILE_MONTH_FORMAT
+from categories_dataframe import categories_dataframe
 
 class CumulativeStatisticsDisplayPipeline:
     ignore_names = ['*categories', 'FC%', '*menu Price $', '*CM $', '*FC $', '*cm category']
@@ -76,16 +78,13 @@ def display_cumulative(dataframe_dict, selected_data):
 
         with col2:
             # TODO HANDLE ERROR GRACEFULLY
-            category_df = read_categories_dataframe()
-            category_df["ALL ITEMS"] = np.nan
-            category_df = category_df.reindex(sorted(category_df.columns), axis=1)
             if selected_data == "Per-Product Data":
                 st.write("Quick-select products")
-                cols = st.columns(len(category_df.columns)) 
-                for col, column_name in zip(cols, category_df.columns):
+                cols = st.columns(len(categories_dataframe.get_columns())) 
+                for col, column_name in zip(cols, categories_dataframe.get_columns()):
                     with col:
                         if st.button(column_name, key=f"trends_multi_{column_name}"):
-                            non_nan_values = category_df[column_name].dropna().tolist()
+                            non_nan_values = categories_dataframe.get_values_for_column(column_name) 
                             st.session_state.trends_multi = [val for val in non_nan_values]
 
             if "trends_multi" not in st.session_state:
@@ -103,11 +102,12 @@ def display_cumulative(dataframe_dict, selected_data):
                 default=default,
                 key="trends_multi",
             )
+
             # TODO TEST -- BREAKING ON WINDOWS
             start_time_str, end_time_str = st.select_slider(
                 "Time Range",
-                options=[row.strftime("%#m/%y") for row in all_time_rows_dt], 
-                value=(all_time_rows_dt[0].strftime("%#m/%y"), all_time_rows_dt[-1].strftime("%#m/%y")),
+                options=[row.strftime(f"{DATE_FILE_MONTH_FORMAT}/%y") for row in all_time_rows_dt], 
+                value=(all_time_rows_dt[0].strftime(f"{DATE_FILE_MONTH_FORMAT}/%y"), all_time_rows_dt[-1].strftime(f"{DATE_FILE_MONTH_FORMAT}/%y")),
                 key="trends_slider"
             )
 
@@ -115,7 +115,7 @@ def display_cumulative(dataframe_dict, selected_data):
             end_time = datetime.strptime(end_time_str, "%m/%y")
 
             selected_rows = [
-                row.strftime("%#m.%y") for row in all_time_rows_dt if start_time <= row <= end_time
+                row.strftime(f"{DATE_FILE_MONTH_FORMAT}.%y") for row in all_time_rows_dt if start_time <= row <= end_time
             ]
 
             csdp = CumulativeStatisticsDisplayPipeline()

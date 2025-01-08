@@ -10,6 +10,7 @@ from displays.display_time_series import display_time_series
 from displays.display_trends import display_trends
 import os
 from app.config import BASE_DIR_PATH, DATA_FILENAME
+import app.dataframe_operations as dfo
 import warnings
 
 def extract(sheets_dict):
@@ -40,6 +41,7 @@ def main():
     apply_streamlit_override_styles()
     warnings.filterwarnings("ignore", category=UserWarning, module="streamlit")
 
+    # TODO GRACEFULLY HANDLE ERROR
     dataframes = pd.read_excel(
         os.path.join(BASE_DIR_PATH, DATA_FILENAME),
         header=0,
@@ -48,6 +50,9 @@ def main():
         index_col=0
     )
     dataframe_dict = extract(dataframes)
+    for df in dataframe_dict.values():
+        dfo.remove_invalid_rows(df)
+        dfo.remove_invalid_columns(df)
 
     sp = StandardizePipeline()
     sp.transform(dataframe_dict, inplace=True)
