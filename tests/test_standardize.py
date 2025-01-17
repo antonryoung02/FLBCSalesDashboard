@@ -1,41 +1,41 @@
 import pytest
 import pandas as pd
 import numpy as np
-from app.transformation_pipelines.standardize import StandardizePipeline 
+from app.transform_data.standardize_transform import standardize_transform 
 
-def test_transform_with_different_columns(pipeline, dataframes_with_different_columns):
+def test_transform_with_different_columns(dataframes_with_different_columns):
     input = dataframes_with_different_columns['input']
     solution = dataframes_with_different_columns['solution']
 
-    pipeline.transform(input, inplace=True)
+    standardize_transform(input, inplace=True)
 
     pd.testing.assert_frame_equal(input['first'], solution['first'])
     pd.testing.assert_frame_equal(input['second'], solution['second'])
 
-def test_transform_with_different_rows(pipeline, dataframes_with_different_rows):
+def test_transform_with_different_rows(dataframes_with_different_rows):
     input = dataframes_with_different_rows['input']
     solution = dataframes_with_different_rows['solution']
 
-    pipeline.transform(input, inplace=True)
+    standardize_transform(input, inplace=True)
 
     pd.testing.assert_frame_equal(input['first'], solution['first'])
     pd.testing.assert_frame_equal(input['second'], solution['second'])
 
-def test_transform_with_different_columns_and_rows(pipeline, dataframes_with_different_columns_and_rows):
+def test_transform_with_different_columns_and_rows(dataframes_with_different_columns_and_rows):
     input = dataframes_with_different_columns_and_rows['input']
     solution = dataframes_with_different_columns_and_rows['solution']
 
-    pipeline.transform(input, inplace=True)
+    standardize_transform(input, inplace=True)
 
     pd.testing.assert_frame_equal(input['first'], solution['first'])
     pd.testing.assert_frame_equal(input['second'], solution['second'])
     pd.testing.assert_frame_equal(input['third'], solution['third'])
 
-def test_transform_with_int_dtypes(pipeline, dataframes_with_int_dtypes):
+def test_transform_with_int_dtypes(dataframes_with_int_dtypes):
     input = dataframes_with_int_dtypes['input']
     solution = dataframes_with_int_dtypes['solution']
 
-    pipeline.transform(input, inplace=True)
+    standardize_transform(input, inplace=True)
 
     pd.testing.assert_frame_equal(input['first'], solution['first']) 
 
@@ -159,7 +159,3 @@ def dataframes_with_int_dtypes():
     }
 
     return {"input":input, "solution":solution}
-
-@pytest.fixture
-def pipeline():
-    return StandardizePipeline()

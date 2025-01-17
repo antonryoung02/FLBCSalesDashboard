@@ -1,20 +1,20 @@
 import pytest
 import pandas as pd
-from app.transformation_pipelines.time_series_cumulative import TimeSeriesCumulativePipeline
+from app.transform_data.time_series_group_transform import time_series_group_transform 
 from app.categories_dataframe import CategoriesDataframe
 
 def test_transform_removes_ignored_features(pipeline, dataframe_with_ignored_features):
-    res = pipeline.transform(dataframe_with_ignored_features)
+    res = pipeline(dataframe_with_ignored_features)
     assert "ignore" not in res.keys()
     assert len(res.keys()) == 1
 
 def test_transform_averages_mean_columns(pipeline, dataframe_with_mean_and_sum_features):
-    res = pipeline.transform(dataframe_with_mean_and_sum_features['input'])
+    res = pipeline(dataframe_with_mean_and_sum_features['input'])
     pd.testing.assert_index_equal(res['mean'].columns, pd.Index(['m', 's']))
     pd.testing.assert_frame_equal(res['mean'], dataframe_with_mean_and_sum_features['solution']['mean'])
 
 def test_transform_sums_non_mean_columns(pipeline, dataframe_with_mean_and_sum_features):
-    res = pipeline.transform(dataframe_with_mean_and_sum_features['input'])
+    res = pipeline(dataframe_with_mean_and_sum_features['input'])
     pd.testing.assert_index_equal(res['arbitrary_feature'].columns, pd.Index(['m', 's']))
     pd.testing.assert_frame_equal(res['arbitrary_feature'], dataframe_with_mean_and_sum_features['solution']['arbitrary_feature']) 
 
@@ -65,10 +65,14 @@ def dataframe_with_ignored_features():
 
 @pytest.fixture
 def pipeline():
-    return TimeSeriesCumulativePipeline(
-        CategoriesDataframe(pd.DataFrame({
-            "m":["m1", "m2", "m3"],
-            "s":["s1", "s2", "s3"]
-        })),
-          mean_features=["mean"], 
-          features_to_ignore=["ignore"])
+
+    def helper(dataframe_dict):
+        categories_dataframe = CategoriesDataframe(pd.DataFrame({
+                "m":["m1", "m2", "m3"],
+                "s":["s1", "s2", "s3"]
+            }))
+        mean_features=["mean"]
+        features_to_ignore=["ignore"]
+        return time_series_group_transform(dataframe_dict, categories_dataframe, mean_features, features_to_ignore)
+
+    return helper

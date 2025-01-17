@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 import streamlit as st
 from app.utils import sort_time_strings
-from app.filters import BaseFilter
+from app.base_filter import BaseFilter
 
 def display_menu_engineering(dataframe_dict, categories_dataframe):
     
@@ -27,7 +27,6 @@ def display_menu_engineering(dataframe_dict, categories_dataframe):
         options=all_time_rows,  
         value=all_time_rows[-1],
         )
-
 
         medp = MenuEngineeringDisplayPipeline(categories_dataframe)
         medp.compute_averages(dataframe_dict[selected_row])

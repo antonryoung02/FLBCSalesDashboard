@@ -1,16 +1,17 @@
-from app.transformation_pipelines.standardize import StandardizePipeline 
-from app.transformation_pipelines.time_series import TimeSeriesPipeline
-from app.transformation_pipelines.time_series_cumulative import TimeSeriesCumulativePipeline
+from app.transform_data.standardize_transform import standardize_transform
+from app.transform_data.time_series_transform import time_series_transform
+from app.transform_data.time_series_group_transform import time_series_group_transform
 import streamlit as st
-from display_pipelines.display_menu_engineering import display_menu_engineering
-from display_pipelines.display_cumulative import CumulativeStatisticsDisplayPipeline
-from display_pipelines.display_time_series import SalesHistoryDisplayPipeline
-from display_pipelines.display_trends import DisplayTrendsPipeline
+from display_data.display_menu_engineering import display_menu_engineering
+from display_data.display_cumulative import CumulativeStatisticsDisplayPipeline
+from display_data.display_time_series import SalesHistoryDisplayPipeline
+from display_data.display_trends import DisplayTrendsPipeline
 from app.dataframe_operations import remove_invalid_columns, remove_invalid_rows
 from app.utils import extract_dataframe_dict_from_excel, initialize_streamlit_styling, display_data_with_pipeline, read_categories_dataframe
 from app.categories_dataframe import CategoriesDataframe
-from app.filters import BaseFilter
+from app.base_filter import BaseFilter
 from app.config import BASE_DIR_PATH, DATA_FILENAME
+
 def main():
     initialize_streamlit_styling()
     try:
@@ -28,17 +29,14 @@ def main():
         remove_invalid_rows(df)
         remove_invalid_columns(df)
 
-    sp = StandardizePipeline()
-    sp.transform(dataframe_dict, inplace=True)
+    standardize_transform(dataframe_dict, inplace=True)
 
     features_to_ignore = ['*categories']
-    tsp = TimeSeriesPipeline(features_to_ignore)
-    per_product_time_dataframe_dict = tsp.transform(dataframe_dict)
+    per_product_time_dataframe_dict = time_series_transform(dataframe_dict, features_to_ignore)
 
     mean_features = ['*menu Price $', 'FC%', '*cm category', '*CM $', '*FC $']
     features_to_ignore = ['*categories']
-    tscp = TimeSeriesCumulativePipeline(categories_dataframe, mean_features, features_to_ignore)
-    per_group_time_dataframe_dict = tscp.transform(per_product_time_dataframe_dict)
+    per_group_time_dataframe_dict = time_series_group_transform(per_product_time_dataframe_dict, categories_dataframe, mean_features, features_to_ignore)
 
     visualization_options = {"Per-Product Data": per_product_time_dataframe_dict, "Per-Group Data":per_group_time_dataframe_dict}
     selected_visualization = st.radio(
