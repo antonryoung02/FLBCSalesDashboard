@@ -6,8 +6,8 @@ class BaseFilter:
     def __init__(self, categories_dataframe):
         self.categories_dataframe = categories_dataframe
 
-    def filter_dataframe(self, dataframe_dict:dict, columns:list, index:list, names:list):
-        filtered_dict = dataframe_dict.copy()   
+    def filter_dataframe(self, dataframe_dict:dict, columns:list, index:list, names:list) -> dict:
+        filtered_dict = dataframe_dict
         if names:
             filtered_dict = {name:df for name, df in dataframe_dict.items() if name in names}
         if columns:
@@ -16,7 +16,7 @@ class BaseFilter:
             filtered_dict = {name:df[df.index.isin(index)] for name, df in filtered_dict.items()}
         return filtered_dict
 
-    def display_quick_select_columns(self, selected_data:str, key:str):
+    def display_quick_select_columns(self, selected_data:str, key:str) -> None:
         if selected_data == "Per-Product Data":
             st.write("Quick-select products")
             cols = st.columns(len(self.categories_dataframe.df.columns)) 

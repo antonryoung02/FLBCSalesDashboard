@@ -1,6 +1,3 @@
-import pandas as pd
-from app.config import CONFIG_SHEET_NAME, DATA_FILENAME, BASE_DIR_PATH
-import os
 import numpy as np
 
 class CategoriesDataframe:
