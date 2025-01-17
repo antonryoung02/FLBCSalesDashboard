@@ -10,9 +10,7 @@ def test_transform(mock_df_dict):
 
 def test_transform_ignores_cols(mock_df_dict_with_ignorecol):
     res = time_series_transform(mock_df_dict_with_ignorecol, features_to_ignore=['ignorecol']) 
-    assert 'f1' in res
-    assert 'f2' in res
-    assert 'ignorecol' not in res
+    assert list(res) == ['f1', 'f2'] 
 
 @pytest.fixture
 def mock_df_dict_with_ignorecol():

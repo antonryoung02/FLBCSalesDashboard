@@ -21,7 +21,7 @@ def display_menu_engineering(dataframe_dict, categories_dataframe):
             non_nan_values = categories_dataframe.get_values_for_column(i)
             selected_products += non_nan_values
 
-        all_time_rows = sort_time_strings(list(dataframe_dict.keys()))
+        all_time_rows = sort_time_strings(list(dataframe_dict))
         selected_row = st.select_slider(
         "Month",
         options=all_time_rows,  

@@ -3,9 +3,9 @@ from app.transform_data.time_series_transform import time_series_transform
 from app.transform_data.time_series_group_transform import time_series_group_transform
 import streamlit as st
 from display_data.display_menu_engineering import display_menu_engineering
-from display_data.display_cumulative import CumulativeStatisticsDisplayPipeline
-from display_data.display_time_series import SalesHistoryDisplayPipeline
-from display_data.display_trends import DisplayTrendsPipeline
+from display_data.display_cumulative import display_cumulative
+from display_data.display_time_series import display_time_series
+from display_data.display_trends import display_trends
 from app.dataframe_operations import remove_invalid_columns, remove_invalid_rows
 from app.utils import extract_dataframe_dict_from_excel, initialize_streamlit_styling, display_data_with_pipeline, read_categories_dataframe
 from app.categories_dataframe import CategoriesDataframe
@@ -41,20 +41,17 @@ def main():
     visualization_options = {"Per-Product Data": per_product_time_dataframe_dict, "Per-Group Data":per_group_time_dataframe_dict}
     selected_visualization = st.radio(
         "Select Data Type",
-        list(visualization_options.keys()),
-        index=list(visualization_options.keys()).index(st.session_state.get("selected_visualization", "Per-Product Data")),
+        list(visualization_options),
+        index=list(visualization_options).index(st.session_state.get("selected_visualization", "Per-Product Data")),
         horizontal=True
     )
 
     selected_dataframe_dict = visualization_options[selected_visualization]
 
     filter = BaseFilter(categories_dataframe)
-    shdp = SalesHistoryDisplayPipeline()
-    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, shdp, "Time Series", filter)
-    dtp = DisplayTrendsPipeline()
-    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, dtp, "Trends", filter)
-    csdp = CumulativeStatisticsDisplayPipeline()
-    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, csdp, "Cumulative", filter)
+    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, display_time_series, "Time Series", filter)
+    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, display_trends, "Trends", filter)
+    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, display_cumulative, "Cumulative", filter)
 
     st.divider()
 

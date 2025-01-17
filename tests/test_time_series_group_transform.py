@@ -47,7 +47,6 @@ def dataframe_with_mean_and_sum_features():
         }
     }
 
-
 @pytest.fixture
 def dataframe_with_ignored_features():
     return {
