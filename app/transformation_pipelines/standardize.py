@@ -1,7 +1,6 @@
 import pandas as pd
-import numpy as np
 from app.utils import get_all_columns, get_all_rows
-import app.dataframe_operations as dfo
+from app.dataframe_operations import convert_columns_to_float64, insert_null_columns, insert_null_rows
 
 class StandardizePipeline:
     """
@@ -32,16 +31,16 @@ class StandardizePipeline:
     def _standardize_dataframe(self, df:pd.DataFrame, all_rows:set, all_columns:set) -> pd.DataFrame:
         df = self._insert_missing_rows(df, all_rows)
         self._insert_missing_columns(df, all_columns)
-        dfo.convert_columns_to_float64(df)
+        convert_columns_to_float64(df)
         return df
     
     def _insert_missing_rows(self, df:pd.DataFrame, all_rows:set) -> pd.DataFrame:
         missing_rows = list(all_rows.difference(set(df.index)))
-        df = dfo.insert_null_rows(df, missing_rows)
+        df = insert_null_rows(df, missing_rows)
         df.sort_index(axis=0, inplace=True)
         return df
 
     def _insert_missing_columns(self, df:pd.DataFrame, all_columns:set) -> None: 
         missing_columns = list(all_columns.difference(set(df.columns)))
-        dfo.insert_null_columns(df, missing_columns)
+        insert_null_columns(df, missing_columns)
         df.sort_index(axis=1, inplace=True)

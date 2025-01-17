@@ -1,7 +1,10 @@
 import pandas as pd
-from app.utils import get_all_columns, get_all_rows, convert_columns_to_float64
-import app.dataframe_operations as dfo
+from app.utils import get_all_columns, get_all_rows
+from app.dataframe_operations import convert_columns_to_float64
+
 class TimeSeriesPipeline:
+    def __init__(self, features_to_ignore=[]):
+        self.features_to_ignore = features_to_ignore
 
     def transform(self, dataframe_dict):
         columns = sorted(list(get_all_columns(dataframe_dict)))
@@ -9,7 +12,8 @@ class TimeSeriesPipeline:
         transformed_data = {}
 
         for f in columns:
-            transformed_data[f] = self._create_dataframe_for_feature(f, rows, dataframe_dict)
+            if f not in self.features_to_ignore:
+                transformed_data[f] = self._create_dataframe_for_feature(f, rows, dataframe_dict)
         
         return transformed_data
 
@@ -19,9 +23,9 @@ class TimeSeriesPipeline:
             feature_df = pd.concat([feature_df, df[f]], axis=1)
 
         feature_df = feature_df.T
-        feature_df.index = [name for name in dataframe_dict.keys()]
+        feature_df.index = [name for name in dataframe_dict]
         feature_df.columns = rows
-        dfo.convert_columns_to_float64(feature_df)
+        convert_columns_to_float64(feature_df)
 
         return feature_df
     

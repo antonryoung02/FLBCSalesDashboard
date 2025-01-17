@@ -1,11 +1,9 @@
 import plotly.graph_objects as go
 import streamlit as st
-from app.utils import get_all_rows, sort_time_strings, read_categories_dataframe
+from app.utils import sort_time_strings
 from app.filters import BaseFilter
-from categories_dataframe import categories_dataframe
-from app.config import DATE_FILE_MONTH_FORMAT
 
-def display_menu_engineering(dataframe_dict):
+def display_menu_engineering(dataframe_dict, categories_dataframe):
     
     st.title("Menu Engineering Matrix")
     col1, col2 = st.columns([2, 8]) 
@@ -31,19 +29,21 @@ def display_menu_engineering(dataframe_dict):
         )
 
 
-        medp = MenuEngineeringDisplayPipeline()
+        medp = MenuEngineeringDisplayPipeline(categories_dataframe)
         medp.compute_averages(dataframe_dict[selected_row])
-        menu_filter = BaseFilter(medp)
-        menu_filter.filter(dataframe_dict, columns=[], index=selected_products, names=[selected_row])
+        filter = BaseFilter(categories_dataframe)
+        filtered_dataframe = filter.filter_dataframe(dataframe_dict, columns=[], index=selected_products, names=[selected_row])
+        medp(filtered_dataframe)
 
 
 
 class MenuEngineeringDisplayPipeline:
     
-    def __init__(self):
+    def __init__(self, categories_dataframe):
         self.transformed_data = None
         self.y = 'mm%' 
         self.x = '*cm category'
+        self.categories_dataframe = categories_dataframe
 
     def __call__(self, data):
         self.transformed_data = self.transform(data)
@@ -67,8 +67,8 @@ class MenuEngineeringDisplayPipeline:
         for name, df in dataframe_dict.items():
             fig = go.Figure()
 
-            for category in categories_dataframe.get_columns():
-                category_items = categories_dataframe.get_values_for_column(category)
+            for category in self.categories_dataframe.get_columns():
+                category_items = self.categories_dataframe.get_values_for_column(category)
                 category_indices = [index for index in df.index if index in category_items]
 
                 filtered_df = df.loc[category_indices]

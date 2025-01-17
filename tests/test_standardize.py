@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from app.standardize import StandardizePipeline 
+from app.transformation_pipelines.standardize import StandardizePipeline 
 
 def test_transform_with_different_columns(pipeline, dataframes_with_different_columns):
     input = dataframes_with_different_columns['input']

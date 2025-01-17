@@ -1,91 +1,66 @@
-from app.standardize import StandardizePipeline 
-from app.time_series import TimeSeriesPipeline
-from app.time_series_cumulative import TimeSeriesCumulativePipeline
-import re
-import pandas as pd
+from app.transformation_pipelines.standardize import StandardizePipeline 
+from app.transformation_pipelines.time_series import TimeSeriesPipeline
+from app.transformation_pipelines.time_series_cumulative import TimeSeriesCumulativePipeline
 import streamlit as st
-from displays.display_menu_engineering import display_menu_engineering
-from displays.display_cumulative import display_cumulative
-from displays.display_time_series import display_time_series
-from displays.display_trends import display_trends
-import os
+from display_pipelines.display_menu_engineering import display_menu_engineering
+from display_pipelines.display_cumulative import CumulativeStatisticsDisplayPipeline
+from display_pipelines.display_time_series import SalesHistoryDisplayPipeline
+from display_pipelines.display_trends import DisplayTrendsPipeline
+from app.dataframe_operations import remove_invalid_columns, remove_invalid_rows
+from app.utils import extract_dataframe_dict_from_excel, initialize_streamlit_styling, display_data_with_pipeline, read_categories_dataframe
+from app.categories_dataframe import CategoriesDataframe
+from app.filters import BaseFilter
 from app.config import BASE_DIR_PATH, DATA_FILENAME
-import app.dataframe_operations as dfo
-import warnings
-
-def extract(sheets_dict):
-    pubhouse_dict = {}
-    for name, df in sheets_dict.items():
-        if sheet_is_valid(name, df):
-            pubhouse_dict[name] = df
-    return pubhouse_dict
-
-def sheet_is_valid(name, df):
-    regex = r'^\d+\.\d+$' # filename must be <number>.<number>
-    return re.search(regex, name, re.IGNORECASE) and len(df.columns) >= 2
-
-def apply_streamlit_override_styles():
-    st.markdown("""
-    <style>
-    div.stButton > button {
-        width: 100%;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-    </style>
-""", unsafe_allow_html=True)
-                
 def main():
-    st.set_page_config(layout="wide", page_title="Sales Dashboard", page_icon="📊")
-    apply_streamlit_override_styles()
-    warnings.filterwarnings("ignore", category=UserWarning, module="streamlit")
+    initialize_streamlit_styling()
+    try:
+        dataframe_dict = extract_dataframe_dict_from_excel()
+    except FileNotFoundError:
+        st.error(f"The excel file was not found. The file is either open, has been renamed from {DATA_FILENAME}, or has been moved from its initial location ({BASE_DIR_PATH}). Fix the issue and rerun the program.")
+        return
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
+        return
 
-    # TODO GRACEFULLY HANDLE ERROR
-    dataframes = pd.read_excel(
-        os.path.join(BASE_DIR_PATH, DATA_FILENAME),
-        header=0,
-        skiprows=[1],
-        sheet_name=None,
-        index_col=0
-    )
-    dataframe_dict = extract(dataframes)
+    categories_dataframe = CategoriesDataframe(read_categories_dataframe())
+
     for df in dataframe_dict.values():
-        dfo.remove_invalid_rows(df)
-        dfo.remove_invalid_columns(df)
+        remove_invalid_rows(df)
+        remove_invalid_columns(df)
 
     sp = StandardizePipeline()
     sp.transform(dataframe_dict, inplace=True)
 
-    tsp = TimeSeriesPipeline()
-    time_dataframe_dict = tsp.transform(dataframe_dict)
+    features_to_ignore = ['*categories']
+    tsp = TimeSeriesPipeline(features_to_ignore)
+    per_product_time_dataframe_dict = tsp.transform(dataframe_dict)
 
-    tscp = TimeSeriesCumulativePipeline()
-    cumulative_time_dataframe_dict = tscp.transform(time_dataframe_dict)
+    mean_features = ['*menu Price $', 'FC%', '*cm category', '*CM $', '*FC $']
+    features_to_ignore = ['*categories']
+    tscp = TimeSeriesCumulativePipeline(categories_dataframe, mean_features, features_to_ignore)
+    per_group_time_dataframe_dict = tscp.transform(per_product_time_dataframe_dict)
 
-    selected_data = st.radio(
+    visualization_options = {"Per-Product Data": per_product_time_dataframe_dict, "Per-Group Data":per_group_time_dataframe_dict}
+    selected_visualization = st.radio(
         "Select Data Type",
-        ["Per-Product Data", "Per-Group Data"],
-        index=["Per-Product Data", "Per-Group Data"].index(st.session_state.get("selected_data", "Per-Product Data")),
+        list(visualization_options.keys()),
+        index=list(visualization_options.keys()).index(st.session_state.get("selected_visualization", "Per-Product Data")),
         horizontal=True
     )
 
-    if selected_data == "Per-Product Data":
-        selected_dataframe_dict = time_dataframe_dict
-    else:
-        selected_dataframe_dict = cumulative_time_dataframe_dict
-        
-    display_time_series(selected_dataframe_dict, selected_data = selected_data)
-    display_trends(selected_dataframe_dict, selected_data = selected_data)
-    display_cumulative(selected_dataframe_dict, selected_data = selected_data)
+    selected_dataframe_dict = visualization_options[selected_visualization]
+
+    filter = BaseFilter(categories_dataframe)
+    shdp = SalesHistoryDisplayPipeline()
+    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, shdp, "Time Series", filter)
+    dtp = DisplayTrendsPipeline()
+    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, dtp, "Trends", filter)
+    csdp = CumulativeStatisticsDisplayPipeline()
+    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, csdp, "Cumulative", filter)
 
     st.divider()
 
-    display_menu_engineering(dataframe_dict)
-    
-
-
-
+    display_menu_engineering(dataframe_dict, categories_dataframe)
 
 if __name__ == "__main__":
     main()
