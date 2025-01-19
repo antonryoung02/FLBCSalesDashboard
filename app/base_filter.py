@@ -1,9 +1,10 @@
 import streamlit as st
 from datetime import datetime
 from app.config import DATE_FILE_MONTH_FORMAT
+from app.categories_dataframe import CategoriesDataframe
 
 class BaseFilter:
-    def __init__(self, categories_dataframe):
+    def __init__(self, categories_dataframe:CategoriesDataframe):
         self.categories_dataframe = categories_dataframe
 
     def filter_dataframe(self, dataframe_dict:dict, columns:list, index:list, names:list) -> dict:

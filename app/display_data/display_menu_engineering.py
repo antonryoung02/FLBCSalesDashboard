@@ -2,8 +2,10 @@ import plotly.graph_objects as go
 import streamlit as st
 from app.utils import sort_time_strings
 from app.base_filter import BaseFilter
+import pandas as pd
+from app.categories_dataframe import CategoriesDataframe
 
-def display_menu_engineering(dataframe_dict, categories_dataframe):
+def display_menu_engineering(dataframe_dict:dict, categories_dataframe:CategoriesDataframe) -> None:
     
     st.title("Menu Engineering Matrix")
     col1, col2 = st.columns([2, 8]) 
@@ -38,17 +40,17 @@ def display_menu_engineering(dataframe_dict, categories_dataframe):
 
 class MenuEngineeringDisplayPipeline:
     
-    def __init__(self, categories_dataframe):
+    def __init__(self, categories_dataframe:CategoriesDataframe):
         self.transformed_data = None
         self.y = 'mm%' 
         self.x = '*cm category'
         self.categories_dataframe = categories_dataframe
 
-    def __call__(self, data):
+    def __call__(self, data:dict):
         self.transformed_data = self.transform(data)
         self.display(self.transformed_data)
 
-    def compute_averages(self, df):
+    def compute_averages(self, df:pd.DataFrame) -> None:
         self.x_mean = df[self.x].mean()
         self.y_mean = df[self.y].mean()
         self.x_min = df[self.x].min()
@@ -56,12 +58,12 @@ class MenuEngineeringDisplayPipeline:
         self.y_min = df[self.y].min()
         self.y_max = df[self.y].max()
 
-    def transform(self, data):
+    def transform(self, data:dict) -> dict:
         for name, df in data.items():
             data[name] = df[[self.x, self.y]]
         return data
     
-    def display(self, dataframe_dict):
+    def display(self, dataframe_dict:dict) -> None:
 
         for name, df in dataframe_dict.items():
             fig = go.Figure()

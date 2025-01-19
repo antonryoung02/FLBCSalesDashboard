@@ -17,7 +17,10 @@ def main():
     try:
         dataframe_dict = extract_dataframe_dict_from_excel()
     except FileNotFoundError:
-        st.error(f"The excel file was not found. The file is either open, has been renamed from {DATA_FILENAME}, or has been moved from its initial location ({BASE_DIR_PATH}). Fix the issue and rerun the program.")
+        st.error(f"The excel file was not found. The file has been renamed from {DATA_FILENAME}, or has been moved from its initial location ({BASE_DIR_PATH}). Fix the issue and rerun the program.")
+        return
+    except PermissionError:
+        st.error(f"The program is unable to run because the excel file is currently open. Save and close the file and rerun the program.")
         return
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")

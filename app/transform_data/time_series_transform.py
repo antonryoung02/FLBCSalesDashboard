@@ -2,7 +2,7 @@ import pandas as pd
 from app.utils import get_all_columns, get_all_rows
 from app.dataframe_operations import convert_columns_to_float64
 
-def time_series_transform(dataframe_dict:dict, features_to_ignore:list=[]):
+def time_series_transform(dataframe_dict:dict, features_to_ignore:list=[]) -> dict:
     columns = sorted(list(get_all_columns(dataframe_dict)))
     rows = sorted(list(get_all_rows(dataframe_dict)))
     transformed_data = {}

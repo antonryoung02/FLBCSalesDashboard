@@ -1,21 +1,7 @@
 import plotly.graph_objects as go
 import streamlit as st
 
-def display_cumulative(data):
-    transformed_data = _transform(data)
-    _display(transformed_data)
-    
-def _transform(data):
-    return data
-
-def _extract_unit(name):
-    symbols = ["#", "$", "%"]
-    for s in symbols:
-        if s in name:
-            return "(" + s + ")"
-    return ""
-
-def _display(data):
+def display_cumulative(data:dict) -> None:
     for name, df in data.items():
         fig = go.Figure()
 
@@ -35,3 +21,10 @@ def _display(data):
         )
         
         st.plotly_chart(fig, use_container_width=True)
+
+def _extract_unit(name:str) -> str:
+    symbols = ["#", "$", "%"]
+    for s in symbols:
+        if s in name:
+            return "(" + s + ")"
+    return ""

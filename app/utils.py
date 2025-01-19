@@ -3,8 +3,9 @@ from app.config import CONFIG_SHEET_NAME, DATA_FILENAME, BASE_DIR_PATH
 import os
 import streamlit as st
 import re
+from app.base_filter import BaseFilter
 
-def get_all_rows(dataframe_dict) -> set:
+def get_all_rows(dataframe_dict:dict) -> set:
     """ Retrieves all products that exist in the data
 
     Args:
@@ -15,7 +16,7 @@ def get_all_rows(dataframe_dict) -> set:
         index_set = index_set.union(df.index)
     return index_set
 
-def get_all_columns(dataframe_dict) -> set:
+def get_all_columns(dataframe_dict:dict) -> set:
     """ Retrieves all product features that exist in the data
 
     Args:
@@ -60,7 +61,7 @@ def extract_dataframe_dict_from_excel():
             pubhouse_monthly_sales_dict[name] = df
     return pubhouse_monthly_sales_dict
 
-def sheet_is_valid(name, df):
+def sheet_is_valid(name:str, df:pd.DataFrame):
     regex = r'^([1-9]|1[0-2])\.\d{2}$'
     return bool(re.search(regex, name, re.IGNORECASE)) and len(df.columns) >= 2
 
@@ -77,7 +78,7 @@ def initialize_streamlit_styling():
         </style>
     """, unsafe_allow_html=True)
 
-def display_data_with_pipeline(dataframe_dict, selected_data, pipeline, pipeline_name, filter):
+def display_data_with_pipeline(dataframe_dict:dict, selected_data:str, pipeline:callable, pipeline_name:str, filter:BaseFilter) -> None:
     st.title(f"{selected_data} {pipeline_name}")
     all_time_rows = sort_time_strings(list(get_all_rows(dataframe_dict)))
     all_time_columns = list(get_all_columns(dataframe_dict))
