@@ -1,7 +1,6 @@
 import pytest
 import pandas as pd
 from app.transform_data.time_series_group_transform import time_series_group_transform 
-from app.categories_dataframe import CategoriesDataframe
 
 def test_transform_removes_ignored_features(pipeline, dataframe_with_ignored_features):
     res = pipeline(dataframe_with_ignored_features)
@@ -66,12 +65,12 @@ def dataframe_with_ignored_features():
 def pipeline():
 
     def helper(dataframe_dict):
-        categories_dataframe = CategoriesDataframe(pd.DataFrame({
-                "m":["m1", "m2", "m3"],
-                "s":["s1", "s2", "s3"]
-            }))
+        categories = { 
+            "m":["m1", "m2", "m3"],
+            "s":["s1", "s2", "s3"]
+        }
         mean_features=["mean"]
         features_to_ignore=["ignore"]
-        return time_series_group_transform(dataframe_dict, categories_dataframe, mean_features, features_to_ignore)
+        return time_series_group_transform(dataframe_dict, categories, mean_features, features_to_ignore)
 
     return helper

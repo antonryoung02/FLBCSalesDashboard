@@ -1,11 +1,10 @@
 import streamlit as st
 from datetime import datetime
 from app.config import DATE_FILE_MONTH_FORMAT
-from app.categories_dataframe import CategoriesDataframe
 
 class BaseFilter:
-    def __init__(self, categories_dataframe:CategoriesDataframe):
-        self.categories_dataframe = categories_dataframe
+    def __init__(self, categories:dict):
+        self.categories = categories
 
     def filter_dataframe(self, dataframe_dict:dict, columns:list, index:list, names:list) -> dict:
         filtered_dict = dataframe_dict
@@ -20,16 +19,16 @@ class BaseFilter:
     def display_quick_select_columns(self, selected_data:str, key:str) -> None:
         if selected_data == "Per-Product Data":
             st.write("Quick-select products")
-            cols = st.columns(len(self.categories_dataframe.df.columns)) 
+            cols = st.columns(len(self.categories.keys())) 
 
         if key not in st.session_state:
             st.session_state[key] = [] 
 
         if selected_data == "Per-Product Data":
-            for col, column_name in zip(cols, self.categories_dataframe.df.columns):
+            for col, column_name in zip(cols, sorted(self.categories.keys())):
                 with col:
                     if st.button(column_name, key=f"{key}_{column_name}"):
-                        st.session_state[key] = self.categories_dataframe.get_values_for_column(column_name)
+                        st.session_state[key] = self.categories[column_name]
 
     def get_selected_dataframe(self, all_dataframe_names:list, key:str) -> list:
         selected_name = st.radio(
@@ -46,6 +45,8 @@ class BaseFilter:
         else:
             default=[]
 
+        self._handle_undefined_keys(all_columns, key)
+
         selected_columns = st.multiselect(
             "Products",
             options=all_columns, 
@@ -53,6 +54,12 @@ class BaseFilter:
             key=key,
         )
         return selected_columns
+
+    def _handle_undefined_keys(self, all_columns:list, key:str) -> None:
+        undefined_keys = set(st.session_state[key]).difference(set(all_columns))
+        if len(undefined_keys) > 0:
+            st.error(f"There are typos in the CONFIG excel spreadsheet. The products {undefined_keys} are not being displayed because they do not exist in the sales data.")
+        st.session_state[key] = list(set(st.session_state[key]).difference(undefined_keys))
         
     def get_selected_rows(self, all_rows:list, key:str) -> list:
 

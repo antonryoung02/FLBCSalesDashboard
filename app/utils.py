@@ -4,6 +4,7 @@ import os
 import streamlit as st
 import re
 from app.base_filter import BaseFilter
+import numpy as np
 
 def get_all_rows(dataframe_dict:dict) -> set:
     """ Retrieves all products that exist in the data
@@ -44,8 +45,15 @@ def sort_time_strings(time_strings: list) -> list:
     
     return sorted_strings
 
-def read_categories_dataframe() -> pd.DataFrame:
-    return pd.read_excel(os.path.join(BASE_DIR_PATH, DATA_FILENAME), sheet_name=CONFIG_SHEET_NAME)
+def read_categories() -> dict:
+    df = pd.read_excel(os.path.join(BASE_DIR_PATH, DATA_FILENAME), sheet_name=CONFIG_SHEET_NAME)
+    categories_dict = {
+        column: df[column].dropna().tolist()
+        for column in df.columns
+    }
+    categories_dict["ALL ITEMS"] = []
+    return categories_dict
+        
 
 def extract_dataframe_dict_from_excel():
     sheets_dict = pd.read_excel(

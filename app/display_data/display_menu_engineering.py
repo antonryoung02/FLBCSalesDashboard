@@ -3,9 +3,8 @@ import streamlit as st
 from app.utils import sort_time_strings
 from app.base_filter import BaseFilter
 import pandas as pd
-from app.categories_dataframe import CategoriesDataframe
 
-def display_menu_engineering(dataframe_dict:dict, categories_dataframe:CategoriesDataframe) -> None:
+def display_menu_engineering(dataframe_dict:dict, categories:dict) -> None:
     
     st.title("Menu Engineering Matrix")
     col1, col2 = st.columns([2, 8]) 
@@ -14,13 +13,13 @@ def display_menu_engineering(dataframe_dict:dict, categories_dataframe:Categorie
 
         selected_indices = st.multiselect(
             "Products",
-            options=categories_dataframe.get_columns(), 
+            options=categories.keys(), 
             key="menu_series_multi",
         )
 
         selected_products = []
         for i in selected_indices:
-            non_nan_values = categories_dataframe.get_values_for_column(i)
+            non_nan_values = categories[i]
             selected_products += non_nan_values
 
         all_time_rows = sort_time_strings(list(dataframe_dict))
@@ -30,9 +29,9 @@ def display_menu_engineering(dataframe_dict:dict, categories_dataframe:Categorie
         value=all_time_rows[-1],
         )
 
-        medp = MenuEngineeringDisplayPipeline(categories_dataframe)
+        medp = MenuEngineeringDisplayPipeline(categories)
         medp.compute_averages(dataframe_dict[selected_row])
-        filter = BaseFilter(categories_dataframe)
+        filter = BaseFilter(categories)
         filtered_dataframe = filter.filter_dataframe(dataframe_dict, columns=[], index=selected_products, names=[selected_row])
         medp(filtered_dataframe)
 
@@ -40,13 +39,13 @@ def display_menu_engineering(dataframe_dict:dict, categories_dataframe:Categorie
 
 class MenuEngineeringDisplayPipeline:
     
-    def __init__(self, categories_dataframe:CategoriesDataframe):
+    def __init__(self, categories:dict):
         self.transformed_data = None
         self.y = 'mm%' 
         self.x = '*cm category'
-        self.categories_dataframe = categories_dataframe
+        self.categories = categories
 
-    def __call__(self, data:dict):
+    def __call__(self, data:dict) -> None:
         self.transformed_data = self.transform(data)
         self.display(self.transformed_data)
 
@@ -68,8 +67,8 @@ class MenuEngineeringDisplayPipeline:
         for name, df in dataframe_dict.items():
             fig = go.Figure()
 
-            for category in self.categories_dataframe.get_columns():
-                category_items = self.categories_dataframe.get_values_for_column(category)
+            for c in self.categories:
+                category_items = self.categories[c]
                 category_indices = [index for index in df.index if index in category_items]
 
                 filtered_df = df.loc[category_indices]
@@ -78,7 +77,7 @@ class MenuEngineeringDisplayPipeline:
                     y=filtered_df[self.y], 
                     x=filtered_df[self.x], 
                     mode='markers', 
-                    name=category, 
+                    name=c, 
                     text=filtered_df.index, 
                     marker=dict(size=10),
                     hovertemplate="<b>Index</b>: %{text}<br><b>Profitability</b>: %{x}<br><b>Popularity</b>: %{y}<extra></extra>"

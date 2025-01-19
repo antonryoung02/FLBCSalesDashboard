@@ -1,7 +1,6 @@
 import pytest
 import pandas as pd
 from app.base_filter import BaseFilter
-from app.categories_dataframe import CategoriesDataframe
 
 def test_filter_rows(base_filter, mock_dataframe_dict):
     included_rows = ['1.24', '2.24']
@@ -39,4 +38,4 @@ def mock_dataframe_dict():
 
 @pytest.fixture
 def base_filter():
-    return BaseFilter(categories_dataframe=CategoriesDataframe(pd.DataFrame()))
+    return BaseFilter(categories={})
