@@ -3,8 +3,9 @@ import streamlit as st
 from app.utils import sort_time_strings
 from app.base_filter import BaseFilter
 import pandas as pd
+from typing import Dict
 
-def display_menu_engineering(dataframe_dict:dict, categories:dict) -> None:
+def display_menu_engineering(dataframe_dict:Dict[str, pd.DataFrame], categories:Dict[str, list]) -> None:
     
     st.title("Menu Engineering Matrix")
     col1, col2 = st.columns([2, 8]) 
@@ -39,7 +40,7 @@ def display_menu_engineering(dataframe_dict:dict, categories:dict) -> None:
 
 class MenuEngineeringDisplayPipeline:
     
-    def __init__(self, categories:dict):
+    def __init__(self, categories:Dict[str, list]):
         self.transformed_data = None
         self.y = 'mm%' 
         self.x = '*cm category'
@@ -57,12 +58,12 @@ class MenuEngineeringDisplayPipeline:
         self.y_min = df[self.y].min()
         self.y_max = df[self.y].max()
 
-    def transform(self, data:dict) -> dict:
+    def transform(self, data:Dict[str, pd.DataFrame]) -> dict:
         for name, df in data.items():
             data[name] = df[[self.x, self.y]]
         return data
     
-    def display(self, dataframe_dict:dict) -> None:
+    def display(self, dataframe_dict:Dict[str, pd.DataFrame]) -> None:
 
         for name, df in dataframe_dict.items():
             fig = go.Figure()

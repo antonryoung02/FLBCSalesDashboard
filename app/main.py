@@ -2,10 +2,10 @@ from app.transform_data.standardize_transform import standardize_transform
 from app.transform_data.time_series_transform import time_series_transform
 from app.transform_data.time_series_group_transform import time_series_group_transform
 import streamlit as st
-from display_data.display_menu_engineering import display_menu_engineering
-from display_data.display_cumulative import display_cumulative
-from display_data.display_time_series import display_time_series
-from display_data.display_trends import display_trends
+from app.display_data.display_menu_engineering import display_menu_engineering
+from app.display_data.display_cumulative import display_cumulative
+from app.display_data.display_time_series import display_time_series
+from app.display_data.display_trends import display_trends
 from app.dataframe_operations import remove_invalid_columns, remove_invalid_rows
 from app.utils import extract_dataframe_dict_from_excel, initialize_streamlit_styling, display_data_with_pipeline, read_categories
 from app.base_filter import BaseFilter
@@ -19,7 +19,7 @@ def main():
         st.error(f"The excel file was not found. The file has been renamed from {DATA_FILENAME}, or has been moved from its initial location ({BASE_DIR_PATH}). Fix the issue and rerun the program.")
         return
     except PermissionError:
-        st.error(f"The program is unable to run because the excel file is currently open. Save and close the file and rerun the program.")
+        st.error("The program is unable to run because the excel file is currently open. Save and close the file and rerun the program.")
         return
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")

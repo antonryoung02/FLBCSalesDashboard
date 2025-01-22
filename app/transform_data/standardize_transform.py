@@ -1,8 +1,9 @@
 import pandas as pd
 from app.utils import get_all_columns, get_all_rows
 from app.dataframe_operations import convert_columns_to_float64, insert_null_columns, insert_null_rows
+from typing import Dict
 
-def standardize_transform(dataframe_dict:dict, inplace:bool=True) -> dict | None:
+def standardize_transform(dataframe_dict:Dict[str, pd.DataFrame], inplace:bool=True) -> Dict[str, pd.DataFrame] | None:
     """Normalizes dataframes in the dict to be of same shape, with same columns and index
 
     Args:

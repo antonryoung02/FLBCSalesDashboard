@@ -1,6 +1,8 @@
 import pytest
 import pandas as pd
 from app.utils import get_all_columns, get_all_rows, sort_time_strings, sheet_is_valid
+from app.config import DATE_FILE_MONTH_FORMAT
+from datetime import datetime 
 
 def test_get_all_rows(mock_dataframe_dict):
     assert get_all_rows(mock_dataframe_dict) == {"row1", "row4", "row5", "row6", "row7", "row8", "row9"}
@@ -14,6 +16,16 @@ def test_sort_time_strings(time_strings_in_expected_format):
 def test_sheet_is_valid(valid_dataframe, time_strings):
     for i in range(len(time_strings['input'])):
         assert sheet_is_valid(time_strings["input"][i], valid_dataframe) == time_strings["solution"][i]
+
+def test_month_format_compatible_with_os():
+    try:
+        all_rows = ['1.24', '2.24', '3.24', '4.24']
+        all_time_rows_dt = [
+            datetime.strptime(row, "%m.%y") for row in all_rows
+            ]
+        display_rows = [row.strftime(f"{DATE_FILE_MONTH_FORMAT}/%y") for row in all_time_rows_dt]
+    except ValueError as e:
+        pytest.fail(f"Failed to format date with error: {e}")
 
 @pytest.fixture
 def time_strings_in_expected_format():

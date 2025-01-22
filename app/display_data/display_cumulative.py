@@ -1,7 +1,14 @@
 import plotly.graph_objects as go
 import streamlit as st
+from typing import Dict
+import pandas as pd
 
-def display_cumulative(data:dict) -> None:
+def display_cumulative(data:Dict[str, pd.DataFrame]) -> None:
+    """Displays a stacked bar chart of all products in the dataframe
+
+    Args:
+        data (dict): 
+    """
     for name, df in data.items():
         fig = go.Figure()
 

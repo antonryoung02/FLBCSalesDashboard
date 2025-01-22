@@ -2,8 +2,9 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import numpy as np
+from typing import Dict
 
-def display_trends(data:dict) -> None:
+def display_trends(data:Dict[str, pd.DataFrame]) -> None:
     transformed_data = _transform(data)
     for name, df in transformed_data.items():
         fig = go.Figure()
@@ -31,7 +32,7 @@ def display_trends(data:dict) -> None:
 
         st.plotly_chart(fig, use_container_width=True)
     
-def _transform(data:dict) -> dict:
+def _transform(data:Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
     trends_data = {}
     for name, df in data.items():
         before = df.iloc[0]

@@ -5,7 +5,7 @@ from typing import Dict
 import pandas as pd
 
 class BaseFilter:
-    def __init__(self, categories:Dict[str, list]):
+    def __init__(self, categories:Dict[str, pd.DataFrame]):
         self.categories = categories
 
     def filter_dataframe(self, dataframe_dict:Dict[str, pd.DataFrame], columns:list, index:list, names:list) -> Dict[str, pd.DataFrame]:
@@ -82,4 +82,3 @@ class BaseFilter:
             row.strftime(f"{DATE_FILE_MONTH_FORMAT}.%y") for row in all_time_rows_dt if start_time <= row <= end_time
         ]
         return selected_rows
-

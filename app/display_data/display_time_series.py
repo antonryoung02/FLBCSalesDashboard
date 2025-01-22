@@ -1,7 +1,9 @@
 import plotly.graph_objects as go
 import streamlit as st
+import pandas as pd
+from typing import Dict
 
-def display_time_series(data:dict) -> None:
+def display_time_series(data:Dict[str, pd.DataFrame]) -> None:
     for name, df in data.items():
         fig = go.Figure()
         for column in df.columns: 
