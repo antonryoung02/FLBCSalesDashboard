@@ -1,56 +1,56 @@
 import plotly.graph_objects as go
 import streamlit as st
-from app.utils import get_all_rows, sort_time_strings, read_categories_dataframe
-from app.filters import BaseFilter
+from app.utils import sort_time_strings
+from app.base_filter import BaseFilter
+import pandas as pd
+from typing import Dict
 
-def display_menu_engineering(dataframe_dict):
+def display_menu_engineering(dataframe_dict:Dict[str, pd.DataFrame], categories:Dict[str, list]) -> None:
     
     st.title("Menu Engineering Matrix")
     col1, col2 = st.columns([2, 8]) 
 
     with col2:
-        category_df = read_categories_dataframe()
-
-        category_df = category_df.reindex(sorted(category_df.columns), axis=1)
 
         selected_indices = st.multiselect(
             "Products",
-            options=category_df.columns, 
+            options=categories.keys(), 
             key="menu_series_multi",
         )
 
         selected_products = []
         for i in selected_indices:
-            non_nan_values = category_df[i].dropna().tolist()
-            selected_products += [val for val in non_nan_values]
+            non_nan_values = categories[i]
+            selected_products += non_nan_values
 
-        all_time_rows = sort_time_strings(list(dataframe_dict.keys()))
+        all_time_rows = sort_time_strings(list(dataframe_dict))
         selected_row = st.select_slider(
         "Month",
         options=all_time_rows,  
         value=all_time_rows[-1],
         )
 
-
-        medp = MenuEngineeringDisplayPipeline()
+        medp = MenuEngineeringDisplayPipeline(categories)
         medp.compute_averages(dataframe_dict[selected_row])
-        menu_filter = BaseFilter(medp)
-        menu_filter.filter(dataframe_dict, columns=[], index=selected_products, names=[selected_row])
+        filter = BaseFilter(categories)
+        filtered_dataframe = filter.filter_dataframe(dataframe_dict, columns=[], index=selected_products, names=[selected_row])
+        medp(filtered_dataframe)
 
 
 
 class MenuEngineeringDisplayPipeline:
     
-    def __init__(self):
+    def __init__(self, categories:Dict[str, list]):
         self.transformed_data = None
         self.y = 'mm%' 
         self.x = '*cm category'
+        self.categories = categories
 
-    def __call__(self, data):
+    def __call__(self, data:dict) -> None:
         self.transformed_data = self.transform(data)
         self.display(self.transformed_data)
 
-    def compute_averages(self, df):
+    def compute_averages(self, df:pd.DataFrame) -> None:
         self.x_mean = df[self.x].mean()
         self.y_mean = df[self.y].mean()
         self.x_min = df[self.x].min()
@@ -58,21 +58,18 @@ class MenuEngineeringDisplayPipeline:
         self.y_min = df[self.y].min()
         self.y_max = df[self.y].max()
 
-    def transform(self, data):
+    def transform(self, data:Dict[str, pd.DataFrame]) -> dict:
         for name, df in data.items():
             data[name] = df[[self.x, self.y]]
         return data
     
-    def display(self, dataframe_dict):
- 
-        category_df = read_categories_dataframe()
-        category_df = category_df.reindex(sorted(category_df.columns), axis=1)
+    def display(self, dataframe_dict:Dict[str, pd.DataFrame]) -> None:
 
         for name, df in dataframe_dict.items():
             fig = go.Figure()
 
-            for category in category_df.columns:
-                category_items = category_df[category].dropna().values
+            for c in self.categories:
+                category_items = self.categories[c]
                 category_indices = [index for index in df.index if index in category_items]
 
                 filtered_df = df.loc[category_indices]
@@ -81,7 +78,7 @@ class MenuEngineeringDisplayPipeline:
                     y=filtered_df[self.y], 
                     x=filtered_df[self.x], 
                     mode='markers', 
-                    name=category, 
+                    name=c, 
                     text=filtered_df.index, 
                     marker=dict(size=10),
                     hovertemplate="<b>Index</b>: %{text}<br><b>Profitability</b>: %{x}<br><b>Popularity</b>: %{y}<extra></extra>"

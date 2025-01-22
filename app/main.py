@@ -1,86 +1,69 @@
-from app.standardize import StandardizePipeline 
-from app.time_series import TimeSeriesPipeline
-from app.time_series_cumulative import TimeSeriesCumulativePipeline
-import re
-import pandas as pd
+from app.transform_data.standardize_transform import standardize_transform
+from app.transform_data.time_series_transform import time_series_transform
+from app.transform_data.time_series_group_transform import time_series_group_transform
 import streamlit as st
-from displays.display_menu_engineering import display_menu_engineering
-from displays.display_cumulative import display_cumulative
-from displays.display_time_series import display_time_series
-from displays.display_trends import display_trends
-import os
+from app.display_data.display_menu_engineering import display_menu_engineering
+from app.display_data.display_cumulative import display_cumulative
+from app.display_data.display_time_series import display_time_series
+from app.display_data.display_trends import display_trends
+from app.dataframe_operations import remove_invalid_columns, remove_invalid_rows
+from app.utils import extract_dataframe_dict_from_excel, initialize_streamlit_styling, display_data_with_pipeline, read_categories
+from app.base_filter import BaseFilter
 from app.config import BASE_DIR_PATH, DATA_FILENAME
-import warnings
 
-def extract(sheets_dict):
-    pubhouse_dict = {}
-    for name, df in sheets_dict.items():
-        if sheet_is_valid(name, df):
-            pubhouse_dict[name] = df
-    return pubhouse_dict
-
-def sheet_is_valid(name, df):
-    regex = r'^\d+\.\d+$' # filename must be <number>.<number>
-    return re.search(regex, name, re.IGNORECASE) and len(df.columns) >= 2
-
-def apply_streamlit_override_styles():
-    st.markdown("""
-    <style>
-    div.stButton > button {
-        width: 100%;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-    </style>
-""", unsafe_allow_html=True)
-                
 def main():
-    st.set_page_config(layout="wide", page_title="Sales Dashboard", page_icon="📊")
-    apply_streamlit_override_styles()
-    warnings.filterwarnings("ignore", category=UserWarning, module="streamlit")
+    initialize_streamlit_styling()
+    try:
+        dataframe_dict = extract_dataframe_dict_from_excel()
+    except FileNotFoundError:
+        st.error(f"The excel file was not found. The file has been renamed from {DATA_FILENAME}, or has been moved from its initial location ({BASE_DIR_PATH}). Fix the issue and rerun the program.")
+        return
+    except PermissionError:
+        st.error("The program is unable to run because the excel file is currently open. Save and close the file and rerun the program.")
+        return
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
+        return
+    
+    categories = read_categories()
+    for df in dataframe_dict.values():
+        remove_invalid_rows(df)
+        remove_invalid_columns(df)
 
-    dataframes = pd.read_excel(
-        os.path.join(BASE_DIR_PATH, DATA_FILENAME),
-        header=0,
-        skiprows=[1],
-        sheet_name=None,
-        index_col=0
-    )
-    dataframe_dict = extract(dataframes)
+    standardize_transform(dataframe_dict, inplace=True)
 
-    sp = StandardizePipeline()
-    sp.transform(dataframe_dict, inplace=True)
+    features_to_ignore = ['*categories']
+    per_product_time_dataframe_dict = time_series_transform(dataframe_dict, features_to_ignore)
 
-    tsp = TimeSeriesPipeline()
-    time_dataframe_dict = tsp.transform(dataframe_dict)
+    mean_features = ['*menu Price $', 'FC%', '*cm category', '*CM $', '*FC $']
+    features_to_ignore = ['*categories']
+    per_group_time_dataframe_dict = time_series_group_transform(per_product_time_dataframe_dict, categories, mean_features, features_to_ignore)
 
-    tscp = TimeSeriesCumulativePipeline()
-    cumulative_time_dataframe_dict = tscp.transform(time_dataframe_dict)
-
-    selected_data = st.radio(
+    visualization_options = {"Per-Product Data": per_product_time_dataframe_dict, "Per-Group Data":per_group_time_dataframe_dict}
+    selected_visualization = st.radio(
         "Select Data Type",
-        ["Per-Product Data", "Per-Group Data"],
-        index=["Per-Product Data", "Per-Group Data"].index(st.session_state.get("selected_data", "Per-Product Data")),
+        list(visualization_options),
+        key="select_visualization",
+        on_change=reset_selected_column_sessions,
+        index=list(visualization_options).index(st.session_state.get("selected_visualization", "Per-Product Data")),
         horizontal=True
     )
 
-    if selected_data == "Per-Product Data":
-        selected_dataframe_dict = time_dataframe_dict
-    else:
-        selected_dataframe_dict = cumulative_time_dataframe_dict
-        
-    display_time_series(selected_dataframe_dict, selected_data = selected_data)
-    display_trends(selected_dataframe_dict, selected_data = selected_data)
-    display_cumulative(selected_dataframe_dict, selected_data = selected_data)
+    selected_dataframe_dict = visualization_options[selected_visualization]
+
+    filter = BaseFilter(categories)
+    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, display_time_series, "Time Series", filter)
+    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, display_trends, "Trends", filter)
+    display_data_with_pipeline(selected_dataframe_dict, selected_visualization, display_cumulative, "Cumulative", filter)
 
     st.divider()
 
-    display_menu_engineering(dataframe_dict)
-    
+    display_menu_engineering(dataframe_dict, categories)
 
-
-
+def reset_selected_column_sessions():
+    names = ["Time Series", "Trends", "Cumulative"]
+    for name in names:
+        st.session_state[f"{name}_multi"] = []
 
 if __name__ == "__main__":
     main()
